@@ -20,11 +20,11 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
   if (!open) return null;
   return (
     <div
-      className="fixed inset-0 z-[120] flex items-center justify-center bg-black/40 p-4"
+      className="atlas-overlay-in fixed inset-0 z-[120] flex items-center justify-center bg-[var(--c-overlay)] backdrop-blur-sm p-4"
       onClick={onClose}
     >
       <div
-        className="flex h-[560px] w-full max-w-2xl flex-col overflow-hidden rounded-lg border border-line bg-surface shadow-xl"
+        className="atlas-dialog-in flex h-[560px] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-line bg-surface shadow-atlas-lg"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-line px-5 py-3">

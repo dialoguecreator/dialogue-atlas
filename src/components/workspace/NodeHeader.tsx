@@ -108,7 +108,7 @@ export function NodeHeader({ nodeId, onShareClick }: NodeHeaderProps) {
   }
 
   return (
-    <div className="relative flex shrink-0 items-center justify-between gap-3 border-b border-line px-12 py-4">
+    <div className="relative flex shrink-0 items-center justify-between gap-3 border-b border-line px-10 py-4">
       <div className="flex flex-1 items-center gap-3">
         <button
           onClick={() => setIconPickerOpen(true)}
@@ -134,7 +134,7 @@ export function NodeHeader({ nodeId, onShareClick }: NodeHeaderProps) {
           value={node.title}
           onChange={(e) => renameNode(node.id, e.target.value)}
           placeholder="Untitled"
-          className="flex-1 bg-transparent text-2xl font-semibold tracking-tight outline-none placeholder:text-ink-soft"
+          className="flex-1 bg-transparent text-[22px] font-semibold tracking-[-0.015em] leading-tight outline-none placeholder:text-ink-soft"
         />
       </div>
 
@@ -179,7 +179,7 @@ export function NodeHeader({ nodeId, onShareClick }: NodeHeaderProps) {
                   className="fixed inset-0 z-30"
                   onClick={() => setExportOpen(false)}
                 />
-                <div className="absolute right-0 top-full z-40 mt-1 w-64 overflow-hidden rounded-md border border-line bg-surface py-1 text-sm shadow-lg">
+                <div className="atlas-menu-in absolute right-0 top-full z-40 mt-1 w-64 overflow-hidden rounded-md border border-line bg-surface py-1 text-sm shadow-lg">
                   <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-ink-soft">
                     Export as
                   </div>

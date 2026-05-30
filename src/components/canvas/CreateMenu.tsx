@@ -92,6 +92,13 @@ export function CreateMenu({
         ? "left-1/2 -translate-x-1/2"
         : "right-0";
 
+  const originClass =
+    anchor === "below-left"
+      ? "atlas-menu-in origin-top-left"
+      : anchor === "center"
+        ? "atlas-menu-in origin-top"
+        : "atlas-menu-in";
+
   return (
     <>
       <div
@@ -102,7 +109,7 @@ export function CreateMenu({
         }}
       />
       <div
-        className={`absolute top-full mt-1 z-40 w-56 overflow-hidden rounded-md border border-line bg-surface py-1 text-sm shadow-lg ${positionClass}`}
+        className={`absolute top-full mt-1 z-40 w-56 overflow-hidden rounded-md border border-line bg-surface py-1 text-sm shadow-lg ${positionClass} ${originClass}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-ink-soft">

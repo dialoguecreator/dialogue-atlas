@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { fileToUpload, inferMime } from "./files";
+import { fileToUpload, filterFilesBySize, inferMime } from "./files";
 import { useStore } from "./store";
 
 function targetIsEditable(target: EventTarget | null): boolean {
@@ -48,8 +48,14 @@ export function usePasteFiles() {
       const types = Array.from(e.clipboardData.types ?? []);
       if (targetIsEditable(e.target) && isPlainTextOnly(types)) return;
 
-      const files = extractFiles(e.clipboardData);
-      if (files.length === 0) return;
+      const rawFiles = extractFiles(e.clipboardData);
+      if (rawFiles.length === 0) return;
+      const files = filterFilesBySize(rawFiles);
+      if (files.length === 0) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
 
       // If the user is typing into an editor and the clipboard has both files
       // and text, let the editor decide (text wins for editors).

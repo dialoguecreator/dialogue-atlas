@@ -68,11 +68,11 @@ export function AiMindmapDialog({ open, onClose, onResult }: AiMindmapDialogProp
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4"
+      className="atlas-overlay-in fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-xl rounded-lg border border-line bg-surface shadow-xl"
+        className="atlas-dialog-in w-full max-w-xl rounded-lg border border-line bg-surface shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-line px-5 py-3">

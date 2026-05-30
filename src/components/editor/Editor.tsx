@@ -5,6 +5,7 @@ import { useCreateBlockNote } from "@blocknote/react";
 import type { Block, PartialBlock } from "@blocknote/core";
 import { useEffect, useMemo, useRef } from "react";
 import { debounce } from "../../lib/utils";
+import { useTheme } from "../../lib/theme";
 
 interface EditorProps {
   nodeId: string;
@@ -29,6 +30,7 @@ function parseInitial(content: string | null): PartialBlock[] | undefined {
 export function Editor({ nodeId, initialContent, onChange, readOnly = false }: EditorProps) {
   // Re-key on nodeId so a fresh editor instance is built per page.
   const initial = useMemo(() => parseInitial(initialContent), [nodeId, initialContent]);
+  const appTheme = useTheme((s) => s.theme);
 
   const editor = useCreateBlockNote(
     initial ? { initialContent: initial } : {},
@@ -48,13 +50,15 @@ export function Editor({ nodeId, initialContent, onChange, readOnly = false }: E
   }, [onChange]);
 
   return (
-    <div className="bn-container h-full overflow-y-auto px-12 py-10">
-      <BlockNoteView
-        editor={editor}
-        editable={!readOnly}
-        theme="light"
-        onChange={() => debouncedSave.current(editor.document)}
-      />
+    <div className="bn-container h-full overflow-y-auto">
+      <div className="mx-auto max-w-[760px] px-8 py-8">
+        <BlockNoteView
+          editor={editor}
+          editable={!readOnly}
+          theme={appTheme === "dark" ? "dark" : "light"}
+          onChange={() => debouncedSave.current(editor.document)}
+        />
+      </div>
     </div>
   );
 }

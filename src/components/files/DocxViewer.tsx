@@ -1,4 +1,5 @@
 import mammoth from "mammoth";
+import DOMPurify from "isomorphic-dompurify";
 import { Download, Loader2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -54,7 +55,30 @@ export function DocxViewer({ base64, fileName }: DocxViewerProps) {
           },
         );
         if (cancelled) return;
-        setHtml(result.value);
+        const safeHtml = DOMPurify.sanitize(result.value, {
+          USE_PROFILES: { html: true },
+          FORBID_TAGS: [
+            "script",
+            "style",
+            "iframe",
+            "object",
+            "embed",
+            "form",
+            "input",
+            "button",
+          ],
+          FORBID_ATTR: [
+            "onerror",
+            "onload",
+            "onclick",
+            "onmouseover",
+            "onmouseout",
+            "onfocus",
+            "onblur",
+            "style",
+          ],
+        });
+        setHtml(safeHtml);
       } catch (e) {
         if (cancelled) return;
         setError(e instanceof Error ? e.message : String(e));

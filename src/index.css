@@ -7,6 +7,7 @@
     --c-bg: #FAFAF7;
     --c-bg-panel: #F2F1EC;
     --c-bg-deep: #E9E7E0;
+    --c-bg-raised: #FFFFFF;
     --c-ink: #1B1B1A;
     --c-ink-muted: #6B6A65;
     --c-ink-soft: #9B9A93;
@@ -15,21 +16,28 @@
     --c-accent-hover: #28583E;
     --c-card: #FFFFFF;
     --c-overlay: rgba(0, 0, 0, 0.3);
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.04), 0 1px 1px rgb(0 0 0 / 0.02);
+    --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.04);
+    --shadow-lg: 0 12px 32px -8px rgb(0 0 0 / 0.18), 0 4px 8px -4px rgb(0 0 0 / 0.08);
     color-scheme: light;
   }
 
   .dark {
-    --c-bg: #141416;
-    --c-bg-panel: #1B1B1E;
-    --c-bg-deep: #25252A;
-    --c-ink: #F0EFEA;
+    --c-bg: #0F1012;
+    --c-bg-panel: #17181B;
+    --c-bg-deep: #1F2024;
+    --c-bg-raised: #1C1D21;
+    --c-ink: #ECEDEF;
     --c-ink-muted: #9C9B95;
     --c-ink-soft: #6E6D67;
-    --c-line: #2E2E33;
-    --c-accent: #4FB37A;
-    --c-accent-hover: #62C58C;
+    --c-line: #2A2C31;
+    --c-accent: #3FA56A;
+    --c-accent-hover: #52B87C;
     --c-card: #1B1B1E;
     --c-overlay: rgba(0, 0, 0, 0.55);
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4), 0 1px 1px rgb(0 0 0 / 0.3);
+    --shadow-md: 0 4px 14px -2px rgb(0 0 0 / 0.5), 0 2px 6px -2px rgb(0 0 0 / 0.3);
+    --shadow-lg: 0 16px 40px -10px rgb(0 0 0 / 0.65), 0 6px 12px -4px rgb(0 0 0 / 0.45);
     color-scheme: dark;
   }
 
@@ -47,6 +55,32 @@
     -moz-osx-font-smoothing: grayscale;
     overflow: hidden;
     transition: background-color 0.35s ease, color 0.35s ease;
+  }
+
+  @keyframes atlas-menu-in {
+    from { opacity: 0; transform: scale(0.96) translateY(-2px); }
+    to   { opacity: 1; transform: none; }
+  }
+  @keyframes atlas-overlay-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes atlas-dialog-in {
+    from { opacity: 0; transform: scale(0.96) translateY(8px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  .atlas-menu-in {
+    animation: atlas-menu-in 130ms cubic-bezier(0.16, 1, 0.3, 1);
+    transform-origin: top right;
+  }
+  .atlas-menu-in.origin-top-left { transform-origin: top left; }
+  .atlas-menu-in.origin-top      { transform-origin: top; }
+  .atlas-overlay-in {
+    animation: atlas-overlay-in 150ms ease-out;
+  }
+  .atlas-dialog-in {
+    animation: atlas-dialog-in 200ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   /* Smooth theme transitions for common surfaces */
@@ -74,13 +108,13 @@
 
 @layer components {
   .btn {
-    @apply inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium text-ink-muted transition hover:bg-bg-panel hover:text-ink;
+    @apply inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium text-ink-muted transition hover:bg-bg-panel hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-1 focus-visible:ring-offset-bg;
   }
   .btn-primary {
     @apply bg-accent text-white hover:bg-accent-hover hover:text-white;
   }
   .input {
-    @apply w-full rounded-md border border-line bg-[var(--c-card)] px-3 py-2 text-sm outline-none focus:border-accent;
+    @apply w-full rounded-md border border-line bg-[var(--c-card)] px-3 py-2 text-sm outline-none focus:border-accent focus-visible:ring-2 focus-visible:ring-accent/40;
   }
   .surface {
     background: var(--c-card);

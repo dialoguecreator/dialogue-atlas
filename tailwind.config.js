@@ -9,6 +9,7 @@ export default {
           DEFAULT: "var(--c-bg)",
           panel: "var(--c-bg-panel)",
           deep: "var(--c-bg-deep)",
+          raised: "var(--c-bg-raised)",
         },
         ink: {
           DEFAULT: "var(--c-ink)",
@@ -32,6 +33,11 @@ export default {
         ],
         serif: ["ui-serif", "Georgia", "serif"],
         mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+      },
+      boxShadow: {
+        "atlas-sm": "var(--shadow-sm)",
+        "atlas-md": "var(--shadow-md)",
+        "atlas-lg": "var(--shadow-lg)",
       },
     },
   },

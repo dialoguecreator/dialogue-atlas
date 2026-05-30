@@ -1,10 +1,13 @@
 import "tldraw/tldraw.css";
 import dagre from "@dagrejs/dagre";
 import {
+  DefaultFontStyle,
   Tldraw,
   createBindingId,
   createShapeId,
   toRichText,
+  useEditor,
+  useValue,
   type Editor,
   type TLShapeId,
 } from "tldraw";
@@ -38,6 +41,12 @@ export function Canvas({ nodeId, readOnly = false }: CanvasProps) {
       registerMindmapEditor(nodeId, editor);
       editor.user.updateUserPreferences({ colorScheme: theme });
       editor.updateInstanceState({ isGridMode: true });
+      // Default to a clean sans-serif font for new shapes & arrows (Miro/FigJam
+      // style) instead of tldraw's hand-drawn "draw" font. Applies to geo,
+      // arrow, note, and text shapes — anything that participates in the
+      // shared DefaultFontStyle. Idempotent: persists in instanceState but
+      // re-applies on every mount in case the previous value was 'draw'.
+      editor.setStyleForNextShapes(DefaultFontStyle, "sans");
       if (readOnly) {
         editor.updateInstanceState({ isReadonly: true });
       }
@@ -110,6 +119,7 @@ export function Canvas({ nodeId, readOnly = false }: CanvasProps) {
           richText: toRichText(n.label),
           color: "black" as const,
           size: "s" as const,
+          font: "sans" as const,
         },
       };
     });
@@ -129,6 +139,7 @@ export function Canvas({ nodeId, readOnly = false }: CanvasProps) {
         type: "arrow",
         props: {
           kind: "elbow" as const,
+          font: "sans" as const,
         },
       });
 
@@ -168,6 +179,7 @@ export function Canvas({ nodeId, readOnly = false }: CanvasProps) {
       <Tldraw
         persistenceKey={`atlas-mindmap-${nodeId}`}
         onMount={handleMount}
+        components={{ OnTheCanvas: ConnectionDots }}
       />
 
       {!readOnly && (
@@ -188,5 +200,78 @@ export function Canvas({ nodeId, readOnly = false }: CanvasProps) {
         onResult={handleAiResult}
       />
     </div>
+  );
+}
+
+/**
+ * Always-visible connection dots (Miro/FigJam style) painted on the N/S/E/W
+ * edges of every geo shape. Rendered via the OnTheCanvas slot so they live
+ * inside tldraw's page-space transform — coordinates here are page units,
+ * not screen pixels.
+ *
+ * Visual affordance only: pointer events are off so dots never intercept
+ * canvas interaction. Users still drag arrows the same way (arrow tool from
+ * any point on the shape, or the built-in selection "create" handle).
+ */
+function ConnectionDots() {
+  const editor = useEditor();
+  const dots = useValue(
+    "connection-dots",
+    () => {
+      if (editor.getInstanceState().isReadonly) return [];
+      const out: { x: number; y: number }[] = [];
+      for (const shape of editor.getCurrentPageShapes()) {
+        // Only geo shapes (rectangle, oval, diamond, etc.) get connection
+        // dots. Arrows, draw strokes, text, frames, images etc. don't.
+        if (shape.type !== "geo") continue;
+        if (editor.isShapeHidden(shape)) continue;
+        const bounds = editor.getShapePageBounds(shape);
+        if (!bounds) continue;
+        out.push({ x: bounds.midX, y: bounds.minY }); // N
+        out.push({ x: bounds.maxX, y: bounds.midY }); // E
+        out.push({ x: bounds.midX, y: bounds.maxY }); // S
+        out.push({ x: bounds.minX, y: bounds.midY }); // W
+      }
+      return out;
+    },
+    [editor],
+  );
+
+  // Subscribe to zoom so the dot radius stays roughly constant in screen
+  // pixels regardless of how far in or out the user is zoomed.
+  const zoom = useValue("zoom", () => editor.getZoomLevel(), [editor]);
+
+  if (dots.length === 0) return null;
+
+  // Target ~5px on screen, clamped at very high zoom (matches how tldraw's
+  // own handles stop growing past 25% zoom).
+  const r = 5 / Math.max(zoom, 0.25);
+
+  return (
+    <svg
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        overflow: "visible",
+        pointerEvents: "none",
+        zIndex: 100,
+      }}
+      width={1}
+      height={1}
+    >
+      {dots.map((d, i) => (
+        <circle
+          key={i}
+          cx={d.x}
+          cy={d.y}
+          r={r}
+          fill="var(--tl-color-panel)"
+          stroke="var(--tl-color-selected)"
+          strokeWidth={1.5}
+          vectorEffect="non-scaling-stroke"
+        />
+      ))}
+    </svg>
   );
 }

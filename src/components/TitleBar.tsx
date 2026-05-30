@@ -26,7 +26,7 @@ export function TitleBar() {
       onDoubleClick={maximize}
       className={classNames(
         "titlebar-drag flex h-11 shrink-0 cursor-default select-none items-center border-b border-line",
-        "bg-gradient-to-b from-bg-panel to-bg-panel/80",
+        "bg-bg-panel/95 backdrop-blur-xl",
       )}
     >
       {/* Left spacer for macOS traffic lights (red/yellow/green) */}
@@ -51,7 +51,7 @@ export function TitleBar() {
             onClick={() => void syncNow()}
             title={lastError ?? "Sync now"}
             className={classNames(
-              "group flex items-center gap-1.5 rounded-full border border-line bg-surface px-2.5 py-1 text-[11px] font-medium shadow-sm transition hover:border-accent",
+              "group flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-medium shadow-sm transition hover:border-accent",
               lastError ? "text-red-500" : "text-ink-muted hover:text-ink",
             )}
           >
@@ -73,7 +73,7 @@ export function TitleBar() {
             )}
           </button>
         ) : (
-          <span className="flex items-center gap-1 rounded-full border border-line bg-surface px-2.5 py-1 text-[11px] text-ink-soft">
+          <span className="flex items-center gap-1 rounded-full border border-line bg-surface px-3 py-1.5 text-xs text-ink-soft">
             <CloudOff size={11} />
             Local only
           </span>

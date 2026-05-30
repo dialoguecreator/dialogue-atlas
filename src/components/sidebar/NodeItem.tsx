@@ -12,7 +12,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { CreateMenu } from "../canvas/CreateMenu";
 import { exportSubtreeAsPdf, exportSubtreeAsZip } from "../../lib/export";
-import { fileToUpload } from "../../lib/files";
+import { fileToUpload, filterFilesBySize } from "../../lib/files";
 import { isDescendant, useStore } from "../../lib/store";
 import { useExternalFileDrop } from "../../lib/useExternalFileDrop";
 import { classNames } from "../../lib/utils";
@@ -75,7 +75,9 @@ export function NodeItem({ id, depth, filteredIds, draggingId }: NodeItemProps) 
   const isDropTarget = isOver && draggingId && draggingId !== id && !isDropDisabled;
 
   const { isExternalDragOver, dropHandlers } = useExternalFileDrop({
-    onFiles: async (files) => {
+    onFiles: async (rawFiles) => {
+      const files = filterFilesBySize(rawFiles);
+      if (files.length === 0) return;
       for (const file of files) {
         const upload = await fileToUpload(file);
         await createFileNode(id, upload);
@@ -114,9 +116,14 @@ export function NodeItem({ id, depth, filteredIds, draggingId }: NodeItemProps) 
   };
 
   const handleFilesSidebar = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-    for (const file of Array.from(files)) {
+    const fileList = e.target.files;
+    if (!fileList || fileList.length === 0) return;
+    const files = filterFilesBySize(Array.from(fileList));
+    if (files.length === 0) {
+      e.target.value = "";
+      return;
+    }
+    for (const file of files) {
       const upload = await fileToUpload(file);
       await createFileNode(id, upload);
     }
@@ -222,7 +229,7 @@ export function NodeItem({ id, depth, filteredIds, draggingId }: NodeItemProps) 
           <ChevronRight
             size={12}
             className={classNames(
-              "transition-transform",
+              "transition-transform duration-150 ease-out",
               isExpanded && "rotate-90",
             )}
           />
@@ -319,7 +326,7 @@ export function NodeItem({ id, depth, filteredIds, draggingId }: NodeItemProps) 
                 setMenuOpen(false);
               }}
             />
-            <div className="absolute right-1 top-7 z-20 w-44 overflow-hidden rounded-md border border-line bg-surface py-1 text-sm shadow-lg">
+            <div className="atlas-menu-in absolute right-1 top-7 z-20 w-44 overflow-hidden rounded-md border border-line bg-surface py-1 text-sm shadow-lg">
               <button
                 onClick={(e) => {
                   e.stopPropagation();

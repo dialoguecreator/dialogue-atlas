@@ -3,6 +3,7 @@ import "@blocknote/mantine/style.css";
 import { BlockNoteEditor, type Block, type PartialBlock } from "@blocknote/core";
 import { BlockNoteView } from "@blocknote/mantine";
 import { useCreateBlockNote } from "@blocknote/react";
+import DOMPurify from "isomorphic-dompurify";
 import { Download, Loader2, PencilLine, RotateCcw } from "lucide-react";
 import mammoth from "mammoth";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -106,9 +107,32 @@ function PreviewWithEnableButton({
     try {
       const arrayBuffer = base64ToArrayBuffer(base64);
       const result = await mammoth.convertToHtml({ arrayBuffer });
+      const safeHtml = DOMPurify.sanitize(result.value, {
+        USE_PROFILES: { html: true },
+        FORBID_TAGS: [
+          "script",
+          "style",
+          "iframe",
+          "object",
+          "embed",
+          "form",
+          "input",
+          "button",
+        ],
+        FORBID_ATTR: [
+          "onerror",
+          "onload",
+          "onclick",
+          "onmouseover",
+          "onmouseout",
+          "onfocus",
+          "onblur",
+          "style",
+        ],
+      });
       // Create a throw-away editor instance to parse HTML to BlockNote blocks
       const tempEditor = BlockNoteEditor.create();
-      const blocks = await tempEditor.tryParseHTMLToBlocks(result.value);
+      const blocks = await tempEditor.tryParseHTMLToBlocks(safeHtml);
       if (!blocks || blocks.length === 0) {
         // Fallback: a single empty paragraph
         await setDocContent(

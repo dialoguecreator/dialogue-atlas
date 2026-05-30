@@ -1,7 +1,7 @@
-import { ChevronDown, ChevronRight, ChevronsUpDown, Edit3, MoreHorizontal, Plus, Trash2 } from "lucide-react";
+import { ChevronRight, ChevronsUpDown, Edit3, MoreHorizontal, Plus, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { useStore } from "../../lib/store";
-import { fileToUpload } from "../../lib/files";
+import { fileToUpload, filterFilesBySize } from "../../lib/files";
 import { useExternalFileDrop } from "../../lib/useExternalFileDrop";
 import type { ViewMode } from "../../types";
 import { classNames } from "../../lib/utils";
@@ -27,7 +27,9 @@ export function ContentMap({ parentId, readOnly = false }: ContentMapProps) {
 
   const { isExternalDragOver, dropHandlers } = useExternalFileDrop({
     disabled: readOnly,
-    onFiles: async (files) => {
+    onFiles: async (rawFiles) => {
+      const files = filterFilesBySize(rawFiles);
+      if (files.length === 0) return;
       let lastId: string | null = null;
       for (const file of files) {
         const upload = await fileToUpload(file);
@@ -66,9 +68,14 @@ export function ContentMap({ parentId, readOnly = false }: ContentMapProps) {
   };
 
   const handleFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-    for (const file of Array.from(files)) {
+    const fileList = e.target.files;
+    if (!fileList || fileList.length === 0) return;
+    const files = filterFilesBySize(Array.from(fileList));
+    if (files.length === 0) {
+      e.target.value = "";
+      return;
+    }
+    for (const file of files) {
       const upload = await fileToUpload(file);
       const newId = await createFileNode(parentId, upload);
       if (files.length === 1) selectNode(newId);
@@ -211,7 +218,9 @@ function TopicCard({ id, depth, readOnly }: TopicCardProps) {
 
   const { isExternalDragOver: isCardDragOver, dropHandlers: cardDropHandlers } =
     useExternalFileDrop({
-      onFiles: async (files) => {
+      onFiles: async (rawFiles) => {
+        const files = filterFilesBySize(rawFiles);
+        if (files.length === 0) return;
         for (const file of files) {
           const upload = await fileToUpload(file);
           await createFileNode(id, upload);
@@ -252,10 +261,15 @@ function TopicCard({ id, depth, readOnly }: TopicCardProps) {
   };
 
   const handleFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
+    const fileList = e.target.files;
+    if (!fileList || fileList.length === 0) return;
+    const files = filterFilesBySize(Array.from(fileList));
+    if (files.length === 0) {
+      e.target.value = "";
+      return;
+    }
     let lastId: string | null = null;
-    for (const file of Array.from(files)) {
+    for (const file of files) {
       const upload = await fileToUpload(file);
       lastId = await createFileNode(id, upload);
     }
@@ -306,7 +320,7 @@ function TopicCard({ id, depth, readOnly }: TopicCardProps) {
       <div
         {...cardDropHandlers}
         className={classNames(
-          "group relative flex items-center gap-2 rounded-md border border-line bg-surface px-3 py-2.5 text-sm shadow-sm transition hover:border-ink-soft",
+          "group relative flex items-center gap-2 rounded-lg border border-line bg-surface px-3.5 py-3 text-sm shadow-atlas-sm hover:shadow-atlas-md hover:border-ink-soft transition-all",
           isCardDragOver && "ring-1 ring-accent bg-accent/10",
         )}
         style={{ marginLeft: indent }}
@@ -322,7 +336,13 @@ function TopicCard({ id, depth, readOnly }: TopicCardProps) {
             !hasChildren && "invisible",
           )}
         >
-          {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+          <ChevronRight
+            size={14}
+            className={classNames(
+              "transition-transform duration-150 ease-out",
+              expanded && "rotate-90",
+            )}
+          />
         </button>
 
         <button
@@ -409,7 +429,7 @@ function TopicCard({ id, depth, readOnly }: TopicCardProps) {
                 setMenuOpen(false);
               }}
             />
-            <div className="absolute right-2 top-10 z-20 w-44 overflow-hidden rounded-md border border-line bg-surface py-1 text-sm shadow-lg">
+            <div className="atlas-menu-in absolute right-2 top-10 z-20 w-44 overflow-hidden rounded-md border border-line bg-surface py-1 text-sm shadow-lg">
               <button
                 onClick={(e) => {
                   e.stopPropagation();

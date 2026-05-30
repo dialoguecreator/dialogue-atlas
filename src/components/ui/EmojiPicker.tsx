@@ -49,11 +49,11 @@ export function EmojiPicker({
 
   return (
     <div
-      className="fixed inset-0 z-[110] flex items-center justify-center bg-black/30 p-4"
+      className="atlas-overlay-in fixed inset-0 z-[110] flex items-center justify-center bg-[var(--c-overlay)] backdrop-blur-sm p-4"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-lg border border-line bg-surface shadow-xl"
+        className="atlas-dialog-in w-full max-w-md rounded-xl border border-line bg-surface shadow-atlas-lg"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-line px-4 py-3">
