@@ -1,0 +1,203 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --c-bg: #FAFAF7;
+    --c-bg-panel: #F2F1EC;
+    --c-bg-deep: #E9E7E0;
+    --c-ink: #1B1B1A;
+    --c-ink-muted: #6B6A65;
+    --c-ink-soft: #9B9A93;
+    --c-line: #D9D6CD;
+    --c-accent: #2F6E4B;
+    --c-accent-hover: #28583E;
+    --c-card: #FFFFFF;
+    --c-overlay: rgba(0, 0, 0, 0.3);
+    color-scheme: light;
+  }
+
+  .dark {
+    --c-bg: #141416;
+    --c-bg-panel: #1B1B1E;
+    --c-bg-deep: #25252A;
+    --c-ink: #F0EFEA;
+    --c-ink-muted: #9C9B95;
+    --c-ink-soft: #6E6D67;
+    --c-line: #2E2E33;
+    --c-accent: #4FB37A;
+    --c-accent-hover: #62C58C;
+    --c-card: #1B1B1E;
+    --c-overlay: rgba(0, 0, 0, 0.55);
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    @apply bg-bg text-ink font-sans antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
+    transition: background-color 0.35s ease, color 0.35s ease;
+  }
+
+  /* Smooth theme transitions for common surfaces */
+  .bg-bg,
+  .bg-bg-panel,
+  .bg-bg-deep,
+  [class*="border-line"],
+  [class*="text-ink"] {
+    transition: background-color 0.35s ease, color 0.35s ease,
+      border-color 0.35s ease;
+  }
+
+  .no-select {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .titlebar-drag {
+    -webkit-app-region: drag;
+  }
+  .titlebar-no-drag {
+    -webkit-app-region: no-drag;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium text-ink-muted transition hover:bg-bg-panel hover:text-ink;
+  }
+  .btn-primary {
+    @apply bg-accent text-white hover:bg-accent-hover hover:text-white;
+  }
+  .input {
+    @apply w-full rounded-md border border-line bg-[var(--c-card)] px-3 py-2 text-sm outline-none focus:border-accent;
+  }
+  .surface {
+    background: var(--c-card);
+  }
+}
+
+/* BlockNote palette adapts to theme via CSS vars */
+.bn-container {
+  --bn-colors-editor-background: transparent;
+  --bn-colors-editor-text: var(--c-ink);
+}
+
+.tldraw-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Watermark overlay for view-only mode */
+.watermark-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background-image: repeating-linear-gradient(
+    -30deg,
+    transparent 0,
+    transparent 220px,
+    rgba(127, 127, 127, 0.04) 220px,
+    rgba(127, 127, 127, 0.04) 440px
+  );
+}
+.watermark-overlay::before {
+  content: attr(data-watermark);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  font-size: 14px;
+  color: rgba(127, 127, 127, 0.16);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transform: rotate(-30deg);
+}
+
+/* Rendered Word doc styling */
+.docx-content h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin: 1.25rem 0 0.5rem;
+  line-height: 1.2;
+}
+.docx-content h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 1.1rem 0 0.5rem;
+  line-height: 1.25;
+}
+.docx-content h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 1rem 0 0.4rem;
+}
+.docx-content p {
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+.docx-content ul,
+.docx-content ol {
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+.docx-content li {
+  margin: 0.25rem 0;
+  line-height: 1.6;
+}
+.docx-content table {
+  border-collapse: collapse;
+  margin: 0.75rem 0;
+  width: 100%;
+}
+.docx-content th,
+.docx-content td {
+  border: 1px solid var(--c-line);
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+}
+.docx-content th {
+  background: var(--c-bg-panel);
+  font-weight: 600;
+}
+.docx-content strong {
+  font-weight: 600;
+}
+.docx-content em {
+  font-style: italic;
+}
+.docx-content a {
+  color: var(--c-accent);
+  text-decoration: underline;
+}
+.docx-content img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* React Flow background dots tint per theme */
+.react-flow {
+  background-color: var(--c-bg);
+}
+.dark .react-flow__controls button {
+  background: var(--c-bg-panel);
+  color: var(--c-ink);
+  border-color: var(--c-line);
+}
+.dark .react-flow__minimap {
+  background: var(--c-bg-panel) !important;
+}

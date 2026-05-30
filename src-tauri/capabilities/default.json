@@ -1,0 +1,30 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Capability for the main window",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "opener:default",
+    "sql:default",
+    {
+      "identifier": "sql:allow-execute",
+      "allow": [{ "database": "sqlite:dialogue-atlas.db" }]
+    },
+    {
+      "identifier": "sql:allow-select",
+      "allow": [{ "database": "sqlite:dialogue-atlas.db" }]
+    },
+    {
+      "identifier": "sql:allow-load",
+      "allow": [{ "database": "sqlite:dialogue-atlas.db" }]
+    },
+    {
+      "identifier": "sql:allow-close",
+      "allow": [{ "database": "sqlite:dialogue-atlas.db" }]
+    },
+    "updater:default",
+    "process:default",
+    "process:allow-restart"
+  ]
+}

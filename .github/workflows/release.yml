@@ -1,0 +1,117 @@
+name: Build & Release
+
+# Triggers when you push a tag starting with "v" (e.g. v0.3.0).
+# Workflow: bump version → commit → tag → push tag → GitHub builds & publishes → Bojan gets update banner.
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release:
+    name: Build & Release macOS (Apple Silicon)
+    runs-on: macos-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Set up Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+
+      - name: Cache cargo registry & target
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            src-tauri/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('src-tauri/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Extract version from tag
+        id: ver
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+
+      - name: Build & sign macOS app
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: npm run tauri build -- --target aarch64-apple-darwin
+
+      - name: Locate build artifacts
+        id: artifacts
+        run: |
+          BUNDLE_DIR="src-tauri/target/aarch64-apple-darwin/release/bundle"
+          DMG=$(ls "$BUNDLE_DIR/dmg/"*.dmg | head -n 1)
+          APP_TGZ="$BUNDLE_DIR/macos/Dialogue Atlas.app.tar.gz"
+          APP_SIG="$BUNDLE_DIR/macos/Dialogue Atlas.app.tar.gz.sig"
+
+          # Normalise filenames (no spaces) so GitHub URLs are clean
+          cp "$DMG" "Dialogue_Atlas_${{ steps.ver.outputs.version }}_aarch64.dmg"
+          cp "$APP_TGZ" "Dialogue_Atlas.app.tar.gz"
+          cp "$APP_SIG" "Dialogue_Atlas.app.tar.gz.sig"
+
+          echo "dmg=Dialogue_Atlas_${{ steps.ver.outputs.version }}_aarch64.dmg" >> "$GITHUB_OUTPUT"
+          echo "appTgz=Dialogue_Atlas.app.tar.gz" >> "$GITHUB_OUTPUT"
+          echo "appSig=Dialogue_Atlas.app.tar.gz.sig" >> "$GITHUB_OUTPUT"
+
+      - name: Generate latest.json (update manifest)
+        run: |
+          VERSION="${{ steps.ver.outputs.version }}"
+          SIG=$(cat "${{ steps.artifacts.outputs.appSig }}")
+          PUB_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          REPO="${{ github.repository }}"
+          URL="https://github.com/${REPO}/releases/download/v${VERSION}/${{ steps.artifacts.outputs.appTgz }}"
+          NOTES="${{ github.event.head_commit.message }}"
+          # Trim notes to a sensible size; default if empty
+          if [ -z "$NOTES" ]; then NOTES="Update Dialogue Atlas to v${VERSION}."; fi
+
+          cat > latest.json <<JSON
+          {
+            "version": "${VERSION}",
+            "notes": $(printf '%s' "$NOTES" | head -c 500 | python3 -c "import json,sys; print(json.dumps(sys.stdin.read()))"),
+            "pub_date": "${PUB_DATE}",
+            "platforms": {
+              "darwin-aarch64": {
+                "signature": "${SIG}",
+                "url": "${URL}"
+              }
+            }
+          }
+          JSON
+
+          echo "--- latest.json ---"
+          cat latest.json
+
+      - name: Create / update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Dialogue Atlas ${{ github.ref_name }}
+          body: |
+            Automated release built from tag ${{ github.ref_name }}.
+
+            Installation:
+            - **First install** — download the `.dmg`, drag to Applications, right-click → Open.
+            - **Existing users** — the app will offer an update automatically.
+          files: |
+            ${{ steps.artifacts.outputs.dmg }}
+            ${{ steps.artifacts.outputs.appTgz }}
+            ${{ steps.artifacts.outputs.appSig }}
+            latest.json
+          fail_on_unmatched_files: true
