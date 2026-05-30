@@ -108,13 +108,23 @@
 
 @layer components {
   .btn {
-    @apply inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium text-ink-muted transition hover:bg-bg-panel hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-1 focus-visible:ring-offset-bg;
+    @apply inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium text-ink-muted transition hover:bg-bg-panel hover:text-ink focus-visible:outline-none focus-visible:ring-2;
+  }
+  .btn:focus-visible {
+    --tw-ring-color: var(--c-accent);
+    --tw-ring-offset-width: 1px;
+    --tw-ring-offset-color: var(--c-bg);
+    --tw-ring-opacity: 0.6;
   }
   .btn-primary {
     @apply bg-accent text-white hover:bg-accent-hover hover:text-white;
   }
   .input {
-    @apply w-full rounded-md border border-line bg-[var(--c-card)] px-3 py-2 text-sm outline-none focus:border-accent focus-visible:ring-2 focus-visible:ring-accent/40;
+    @apply w-full rounded-md border border-line bg-[var(--c-card)] px-3 py-2 text-sm outline-none focus:border-accent focus-visible:ring-2;
+  }
+  .input:focus-visible {
+    --tw-ring-color: var(--c-accent);
+    --tw-ring-opacity: 0.4;
   }
   .surface {
     background: var(--c-card);
